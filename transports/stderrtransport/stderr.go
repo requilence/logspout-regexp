@@ -15,8 +15,8 @@ func (tgn *StdErrTransport) Name() string {
 	return "stderr"
 }
 
-func (tgn *StdErrTransport) Write(containerId, containerImage, matchedString, re string) error {
-	_, err := fmt.Fprintf(os.Stderr, "container: %s(%s) match '%s': %s", containerId, containerImage, re, matchedString)
+func (tgn *StdErrTransport) Write(containerId, containerName, matchedString, re string) error {
+	_, err := fmt.Fprintf(os.Stderr, "container: %s(%s) match '%s': %s", containerId, containerName, re, matchedString)
 
 	return err
 }

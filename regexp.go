@@ -22,7 +22,7 @@ func init() {
 
 type Transport interface {
 	Name() string
-	Write(containerId, containerImage, matchedString, re string) error
+	Write(containerId, containerName, matchedString, re string) error
 }
 
 // RegexpAdapter is an adapter that match logs with regexp in file
@@ -120,7 +120,7 @@ func (a *RegexpAdapter) Stream(logstream chan *router.Message) {
 				m.Data = "***"
 			}
 
-			err := a.transport.Write(shortContainerId(m.Container.ID), m.Container.Image, m.Data, re)
+			err := a.transport.Write(shortContainerId(m.Container.ID), m.Container.Name, m.Data, re)
 			if err != nil {
 				log.Printf("failed to write %s: %s", a.transport.Name(), err.Error())
 			}
