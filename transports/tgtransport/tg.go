@@ -68,6 +68,7 @@ func New(options map[string]string) (*TGTransport, error) {
 
 type Payload struct {
 	ChatID int64  `json:"chat_id"`
+	ParseMode string `json:"parse_mode"`
 	Text   string `json:"text"`
 }
 
@@ -89,9 +90,14 @@ func (tgn *TGTransport) Write(containerId, containerName, matchedString, re stri
 	tgn.throttleSame[groupEvent] = time.Now()
 	tgn.throttleSameMutex.Unlock()
 
+	matchedString = strings.Replace(matchedString, "&", "&amp;", -1)
+	matchedString = strings.Replace(matchedString, "<", "&lt;", -1)
+	matchedString = strings.Replace(matchedString, ">", "&gt;", -1)
+
 	data := Payload{
 		ChatID: tgn.chat,
-		Text:   fmt.Sprintf("Found match for %s(%s) container\nregexp: %s:\n%s", strings.TrimLeft(containerName,"/"), containerId, re, matchedString),
+		ParseMode: "html",
+		Text:   fmt.Sprintf("Found log match for <strong>%s(%s)</strong> container\nregexp: <code>%s</code>\n<pre>%s</pre>", strings.TrimLeft(containerName,"/"), containerId, re, matchedString),
 	}
 
 	payloadBytes, err := json.Marshal(data)
