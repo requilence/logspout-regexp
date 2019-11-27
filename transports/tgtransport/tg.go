@@ -74,7 +74,7 @@ func (tgn *TGTransport) Name() string {
 	return "tg"
 }
 
-func (tgn *TGTransport) Write(containerId, containerName, matchedString, re string) error {
+func (tgn *TGTransport) Write(containerId, containerImage, matchedString, re string) error {
 	groupEvent := containerId + "/" + re
 
 	tgn.throttleSameMutex.Lock()
@@ -90,7 +90,7 @@ func (tgn *TGTransport) Write(containerId, containerName, matchedString, re stri
 
 	data := Payload{
 		ChatID: tgn.chat,
-		Text:   fmt.Sprintf("Found match for %s(%s) container\nregexp: %s:\n%s", containerName, containerId, re, matchedString),
+		Text:   fmt.Sprintf("Found match for %s(%s) container\nregexp: %s:\n%s", containerId, containerImage, re, matchedString),
 	}
 
 	payloadBytes, err := json.Marshal(data)

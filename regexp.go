@@ -22,7 +22,7 @@ func init() {
 
 type Transport interface {
 	Name() string
-	Write(containerId, containerName, matchedString, re string) error
+	Write(containerId, containerImage, matchedString, re string) error
 }
 
 // RegexpAdapter is an adapter that match logs with regexp in file
@@ -53,12 +53,18 @@ func New(route *router.Route) (router.LogAdapter, error) {
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		re, err := re.Compile(scanner.Text())
+		text := strings.TrimSpace(scanner.Text())
+
+		if len(text) == 0 {
+			continue
+		}
+
+		compiledRe, err := re.Compile(text)
 		if err != nil {
 			return nil, err
 		}
 
-		rna.regexps = append(rna.regexps, re)
+		rna.regexps = append(rna.regexps, compiledRe)
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -114,10 +120,19 @@ func (a *RegexpAdapter) Stream(logstream chan *router.Message) {
 				m.Data = "***"
 			}
 
-			err := a.transport.Write(m.Container.ID, m.Container.Name, m.Data, re)
+			err := a.transport.Write(shortContainerId(m.Container.ID), m.Container.Image, m.Data, re)
 			if err != nil {
 				log.Printf("failed to write %s: %s", a.transport.Name(), err.Error())
 			}
 		}
 	}
+}
+
+func shortContainerId(full string) string{
+	maxLen := 12
+	if len(full) < maxLen {
+		maxLen = len(full)
+	}
+
+	return full[0:maxLen]
 }

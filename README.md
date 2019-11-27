@@ -12,19 +12,24 @@ import (
 )
 ```
 
-in modules.go.
+in modules.go. Or just clone this repo and use [logspout-module](https://github.com/requilence/logspout-regexp/tree/master/logspout-module) dir in this repo.
 
-Use by setting a docker environment variable `ROUTE_URIS=logstash://host:port` to the Logstash server.
-The default protocol is UDP, but it is possible to change to TCP by adding ```+tcp``` after the logstash protocol when starting your container.
+## How to use
+Use by setting a docker environment variable: `ROUTE_URIS=regexp://bot?file=regexps.txt&hide_matched_string=1"`
 
+The default transport is `stderr`, but this adapter mainly created to work with Telegram. You should put the right bot's token(you've got from [@BotFather](https://t.me/BotFather) and chat's id. Here is an example:
+`ROUTE_URIS=regexp+tg://bot?file=regexps.txt&throttle_seconds=600&hide_matched_string=1&chat=123&token=112233444:AAEfzA2_Q-FnUfasuib2_DAfdsn23jnK5s6QcQ"`
+
+Full command to run docker container with `logspout-regexp`. Please note, that first you must build it locally: `docker build -t logspout-regexp .`
 ```bash
 docker run --name="logspout" \
     --volume=/var/run/docker.sock:/var/run/docker.sock \
+    --mount type=bind,source=$(pwd)/regexps.txt,target=/regexps.txt \
     -e "ROUTE_URIS=regexp+tg://bot?file=regexps.txt&throttle_seconds=600&hide_matched_string=1&chat=123&token=112233444:AAEfzA2_Q-FnUfasuib2_DAfdsn23jnK5s6QcQ" \
     logspout-regexp:latest
 ```
 
-In your `logspout_regexps.txt` you can put the right regexps to match:
+In your `regexps.txt` you can put regexps to match container logs:
 ```
 (?i)([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,24})
 part_of_sensitive_info
